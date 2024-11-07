@@ -103,6 +103,41 @@ app.post('/api/transcription', async (req, res) => {
     res.status(500).json({ error: "Error saving transcription" });
   }
 });
+// Get meeting transcriptions by meetingId
+app.get('/api/transcription/:meetingId', async (req, res) => {
+  try {
+    const { meetingId } = req.params;
+    
+    // Validate meetingId
+    if (!meetingId) {
+      return res.status(400).json({ error: 'Meeting ID is required' });
+    }
+
+    // Find meeting transcription document
+    const meetingTranscription = await MeetingTranscription.findOne({ meetingId });
+    
+    // If no meeting found with the provided ID
+    if (!meetingTranscription) {
+      return res.status(404).json({ 
+        error: 'Meeting not found',
+        meetingId 
+      });
+    }
+
+    // Return the full meeting transcription object
+    res.status(200).json({
+      success: true,
+      data: meetingTranscription
+    });
+
+  } catch (error) {
+    console.error('Error fetching meeting transcription:', error);
+    res.status(500).json({ 
+      error: "Error fetching meeting transcription",
+      message: error.message 
+    });
+  }
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
